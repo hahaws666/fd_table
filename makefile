@@ -13,4 +13,4 @@ help:
 	@echo "  clean          Remove object files"
 
 clean:
-	rm -f $(OBJS) 
+	rm -f *.o fd_table
