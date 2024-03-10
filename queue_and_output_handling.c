@@ -83,6 +83,7 @@ c_m* create_new(pid_t pid, int fd, const char *fname, unsigned long inode) {
     return result;
 }
 
+
 /*
 add new nodes into the queue
 */
@@ -122,15 +123,19 @@ void print_queue(c_m * res, int pid, int process,int systemwide ,int vnodes, int
         printf("inode\t");
     }
     printf("\n");
-    printf("\t========================================\n\n");
-    while (res->next != NULL) 
+    if (threshold== 0)
     {
+        printf("No one knows the CSCB09 better than me\n");
+    }
+    
+    printf("\t========================================\n\n");
+    while (res!= NULL) 
+    {
+
         if (pid !=-1)
         {
             if (res->pid == pid)
             {
-                if (res->fd > threshold)
-                {
                     printf("%d\t",counter);
                     counter++;
 
@@ -153,17 +158,12 @@ void print_queue(c_m * res, int pid, int process,int systemwide ,int vnodes, int
                             printf("%s\t", res->fname);
                             printf("%ld   ", res -> inode );
                         }
-                        
-                    
-                }
                 printf("\n");
             }
             
         }
         else
         {
-            if (res->fd > threshold)
-                {
                     printf("%d\t",counter);
                     counter++;
 
@@ -181,7 +181,6 @@ void print_queue(c_m * res, int pid, int process,int systemwide ,int vnodes, int
                                 printf("%ld   ", res -> inode );
                             }
                     
-                }
                         printf("\n");
         }
 
@@ -190,17 +189,31 @@ void print_queue(c_m * res, int pid, int process,int systemwide ,int vnodes, int
     
 }
 
+
 /*
 to print the pid and fd with bigger than the threshold
 */
 void print_threshold(c_m *res, int threshold){
     printf("## Offending processes:\n");
+    int counter = 0;
+    int last =0;
     while (res->next!=NULL)
     {
-        if (res->fd > threshold)
+        if (res->pid==last)
         {
-            printf("%d (%d) \t",res->pid,res->fd);
+            counter++;
         }
+        else
+        {
+  
+            if (counter > threshold)
+            {
+                printf("%d (%d) \t",res->pid,counter);
+            }
+            counter=1;
+            last = res->pid;
+        }
+        
         res=res->next;
     }
     
@@ -209,21 +222,31 @@ void print_threshold(c_m *res, int threshold){
 /*
 to output the result of lnk list into a txt file
 */
-void write_txt_file(c_m *res) {
+void write_txt_file(c_m *res,int node) {
     FILE *fp = fopen("compositeTable.txt", "w"); // Open for writing in text mode
     if (fp == NULL) {
         perror("Failed to open file");
         return;
     }
-
     fprintf(fp, "\t pid \t fd \t filename \t\t inode\n");
     fprintf(fp, "\t=================================================\n");
-
-    while (res != NULL) {
-        fprintf(fp, "%d\t%d\t%s\t%lu\n", res->pid, res->fd, res->fname, res->inode);
+    if (node ==-1)
+    {
+        while (res != NULL) {
+            fprintf(fp, "%d\t%d\t%s\t%lu\n", res->pid, res->fd, res->fname, res->inode);
+            res = res->next;
+        }
+    }
+    else
+    {
+        while (res != NULL) {
+            if (res->pid ==node)
+            {
+                fprintf(fp, "%d\t%d\t%s\t%lu\n", res->pid, res->fd, res->fname, res->inode);
+            }
         res = res->next;
     }
-
+    }
     fclose(fp); // Close the file after writing
 }
 
@@ -231,26 +254,51 @@ void write_txt_file(c_m *res) {
 /*
 to output the output into a binary file
 */
-void write_binary_file( c_m *res) {
+void write_binary_file( c_m *res,int node) {
     FILE *fp = fopen("compositeTable.bin", "wb"); // Open for writing in binary mode
     if (fp == NULL) {
         perror("Failed to open file");
         return;
     }
+    if (node == -1) {
+    {
+            while (res != NULL) {
+            // Write numeric data directly
+            fwrite(&res->pid, sizeof(int), 1, fp);
+            fwrite(&res->fd, sizeof(int), 1, fp);
+            fwrite(&res->inode, sizeof(int), 1, fp);
+            // For the string, write the length followed by the string itself
+            int fname_len = strlen(res->fname);  //get length
+            fwrite(res->fname, sizeof(char), fname_len, fp);
+            fwrite(&(res->inode), sizeof(ino_t), 1, fp); 
+            fwrite("\n", sizeof(char), 1, fp); //writes a newline to file
 
-    while (res != NULL) {
-        // Write numeric data directly
-        fwrite(&res->pid, sizeof(res->pid), 1, fp);
-        fwrite(&res->fd, sizeof(res->fd), 1, fp);
-        fwrite(&res->inode, sizeof(res->inode), 1, fp);
-
-        // For the string, write the length followed by the string itself
-        int fname_len = strlen(res->fname) + 1; // +1 for NULL terminator
-        fwrite(&fname_len, sizeof(fname_len), 1, fp);
-        fwrite(res->fname, sizeof(char), fname_len, fp);
-
-        res = res->next;
+            res = res->next;
+        }
     }
+    }
+    else
+    {
+        while (res != NULL) {
+            if (res->pid==node)
+                {
+                    fwrite(&res->pid, sizeof(int), 1, fp);
+                    fwrite(&res->fd, sizeof(int), 1, fp);
+                    fwrite(&res->inode, sizeof(int), 1, fp);
+                    // For the string, write the length followed by the string itself
+                    int fname_len = strlen(res->fname);  //get length
+                    fwrite(res->fname, sizeof(char), fname_len, fp);
+                    fwrite(&(res->inode), sizeof(ino_t), 1, fp); 
+                    fwrite("\n", sizeof(char), 1, fp); //writes a newline to file
+                }
+                
+
+
+            res = res->next;
+        }
+    }
+    
+
 
     fclose(fp); // Close the file after writing
 }

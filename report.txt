@@ -1,0 +1,25 @@
+let's check the time between the bin and txt
+sample   txt_time  		bin_time  		specific_txt_time  		specific_bin_time
+1       0.068(39917b) 	.032(21793)		.017(254)				.029(192)
+2	0.077(40183b)	.017(21584)		.017(254)				.019(192)
+3	0.036(39182b)	.019(21583)		.026(254)				.016(192)
+4	0.021(21478b) 	.028(21584)		.023(254)				.019(192)
+5	0.024(35188)	.025(21585)		.024(254)				.017(192)
+
+
+
+Type		Average Time		Std Dev Time	Average File Size	Std Dev File Size
+txt_time	0.05050			0.02639		35190.0 bytes		9151.13 bytes
+bin_time	0.02400			0.00717		21636.0 bytes		104.67 bytes
+specific_txt_time	0.0208		0.00450		254.0 bytes		0.00 bytes
+specific_bin_time	0.0202		0.00568		192.0 bytes		0.00 bytes
+
+
+
+
+we done that by using the shell with time ./fd_table --output_TXT or --ouyput_binary with adding a int represent for the specific pid
+then aclaulate the average and variance 
+by observation
+binary files take up less space and require less time to be created than text files in ASCII format.
+an ASCII file can only store a maximum of 128 different characters, then we find that 
+binary encoding make the files with 0s and 1s, each character is based on the size of the type , which requires may result in fewer bits to store the same amount of information as ASCII encoding, resulting in smaller file sizes. as some int may goes into very large(in this assignment)

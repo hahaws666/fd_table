@@ -1,0 +1,6 @@
+	 pid 	 fd 	 filename 		 inode
+	=================================================
+62483	0	/dev/null	5
+62483	7	/sys/fs/cgroup/user.slice/user-24556696.slice/user@24556696.service	84833
+62483	10	/proc/62483/mountinfo	993686
+62483	14	/proc/swaps	4026532089
